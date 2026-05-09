@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维视灵眸 VisLM - 新一代视觉大模型（概念展示站） | AI视觉智能领导者</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 15px 80px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: #2563eb;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #2563eb;
+        }
+
+        .nav-cta {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white !important;
+            padding: 12px 28px !important;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .nav-cta::after {
+            display: none !important;
+        }
+
+        /* 移动端导航菜单按钮 */
+        .menu-toggle {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1e293b;
+        }
+
+        /* 首屏区域 */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 60px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 50%);
+        }
+
+        .hero-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 1000px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(37, 99, 235, 0.15);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            padding: 10px 24px;
+            border-radius: 50px;
+            color: #3b82f6;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 35px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #2563eb;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero-title {
+            font-size: 72px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 25px;
+            line-height: 1.1;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+            letter-spacing: -2px;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 22px;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 50px;
+            line-height: 1.7;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            animation: fadeInUp 0.8s ease 0.6s backwards;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 80px;
+            animation: fadeInUp 0.8s ease 0.8s backwards;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* 通用区块 */
+        section {
+            padding: 120px 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 8px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .section-title {
+            font-size: 52px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .section-desc {
+            font-size: 18px;
+            color: #64748b;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* 核心技术 */
+        .features {
+            background: #f8fafc;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.15);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .feature-tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* 产品展示 */
+        .products {
+            background: white;
+        }
+
+        .product-showcase {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-bottom: 100px;
+        }
+
+        .product-main.reverse {
+            direction: rtl;
+        }
+
+        .product-main.reverse .product-content {
+            direction: ltr;
+        }
+
+        .product-image {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            border-radius: 30px;
+            height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 100px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(37, 99, 235, 0.25);
+        }
+
+        .product-image::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 30s infinite linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .product-content h3 {
+            font-size: 42px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .product-content p {
+            font-size: 17px;
+            color: #64748b;
+            line-height: 1.9;
+            margin-bottom: 30px;
+        }
+
+        .product-features {
+            list-style: none;
+        }
+
+        .product-features li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 0;
+            font-size: 16px;
+            color: #475569;
+        }
+
+        .product-features li::before {
+            content: '✓';
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .product-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .product-stat {
+            text-align: center;
+            padding: 30px 20px;
+            background: #f8fafc;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .product-stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .product-stat-label {
+            font-size: 15px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* 解决方案 */
+        .solutions {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+        }
+
+        .solutions .section-title {
+            color: white;
+        }
+
+        .solutions .section-desc {
+            color: rgba(255,255,255,0.75);
+        }
+
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 35px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .solution-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 45px 40px;
+            border-radius: 24px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .solution-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(37, 99, 235, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .solution-icon {
+            font-size: 48px;
+            margin-bottom: 25px;
+            color: #3b82f6;
+        }
+
+        .solution-card h3 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .solution-card p {
+            font-size: 16px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .solution-benefits {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .solution-benefit {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .solution-benefit::before {
+            content: '→';
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* 技术架构 */
+        .tech-arch {
+            background: #f8fafc;
+        }
+
+        .arch-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .arch-diagram {
+            background: white;
+            padding: 60px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .arch-layer {
+            position: relative;
+            margin-bottom: 50px;
+            padding-left: 140px;
+        }
+
+        .arch-layer:last-child {
+            margin-bottom: 0;
+        }
+
+        .arch-layer-title {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+        }
+
+        .arch-blocks {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .arch-block {
+            flex: 1;
+            min-width: 180px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 28px 24px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .arch-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(37, 99, 235, 0.35);
+        }
+
+        /* 客户案例 */
+        .cases {
+            background: white;
+        }
+
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .case-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .case-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        .case-image {
+            height: 220px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 80px;
+        }
+
+        .case-content {
+            padding: 35px;
+        }
+
+        .case-industry {
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .case-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .case-content p {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .case-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #10b981;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* 联系我们 */
+        .contact {
+            background: #f8fafc;
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+        }
+
+        .contact-info h3 {
+            font-size: 38px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 35px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .contact-content h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .contact-content p {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 55px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 15px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 130px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
+        }
+
+        /* 页脚 */
+        footer {
+            background: #0f172a;
+            color: white;
+            padding: 100px 80px 50px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 70px;
+            margin-bottom: 70px;
+        }
+
+        .footer-brand .logo {
+            margin-bottom: 25px;
+        }
+
+        .footer-brand .logo-text {
+            color: white;
+        }
+
+        .footer-brand p {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.9;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-social a {
+            width: 42px;
+            height: 42px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .footer-social a:hover {
+            background: #2563eb;
+            transform: translateY(-3px);
+        }
+
+        .footer-column h4 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 28px;
+            color: white;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 14px;
+        }
+
+        .footer-column ul li a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            display: inline-block;
+        }
+
+        .footer-column ul li a:hover {
+            color: #3b82f6;
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 40px;
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+
+        /* 动画关键帧 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .navbar {
+                padding: 20px 40px;
+            }
+
+            .navbar.scrolled {
+                padding: 15px 40px;
+            }
+
+            section {
+                padding: 100px 40px;
+            }
+
+            .hero-title {
+                font-size: 56px;
+            }
+
+            .features-grid,
+            .solutions-grid,
+            .cases-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 50px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .hero-title {
+                font-size: 48px;
+            }
+
+            .hero-subtitle {
+                font-size: 18px;
+            }
+
+            .product-main {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .product-main.reverse {
+                direction: ltr;
+            }
+
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .product-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .navbar.scrolled {
+                padding: 10px 20px;
+            }
+
+            section {
+                padding: 80px 20px;
+            }
+
+            .hero {
+                padding: 100px 20px 60px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .features-grid,
+            .solutions-grid,
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 36px;
+            }
+
+            .arch-layer {
+                padding-left: 0;
+                margin-bottom: 30px;
+            }
+
+            .arch-layer-title {
+                position: static;
+                margin-bottom: 20px;
+                transform: none;
+                display: inline-block;
+            }
+
+            .arch-blocks {
+                flex-direction: column;
+            }
+
+            .contact-form {
+                padding: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <div class="logo-icon">👁️</div>
+            <span class="logo-text">维视<span>灵眸</span></span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">域名释义</a></li>
+            <li><a href="#home" class="active">首页</a></li>
+            <li><a href="#features">核心技术</a></li>
+            <li><a href="#products">产品能力</a></li>
+            <li><a href="#solutions">解决方案</a></li>
+            <li><a href="#cases">客户案例</a></li>
+            <li><a href="index.html" class="nav-cta">免费试用</a></li>
+        </ul>
+        <div class="menu-toggle">☰</div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span>🚀 新一代视觉智能平台</span>
+            </div>
+            <h1 class="hero-title">
+                维视灵眸 <span>VisLM</span>
+            </h1>
+            <p class="hero-subtitle">
+                基于万亿级参数训练，支持多模态理解与生成，为各行各业提供精准的视觉智能解决方案，助力企业实现数字化转型
+            </p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-primary">
+                    <span>开始免费试用</span>
+                    <span>→</span>
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    <span>了解更多技术</span>
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">100B+</div>
+                    <div class="hero-stat-label">模型参数量</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">1000+</div>
+                    <div class="hero-stat-label">服务企业</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">99.5%</div>
+                    <div class="hero-stat-label">识别准确率</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-header">
+            <span class="section-tag">技术优势</span>
+            <h2 class="section-title">为什么选择维视灵眸</h2>
+            <p class="section-desc">依托自主研发的深度学习框架和大规模训练数据，VisLM 在多个维度实现技术突破</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>超高精度识别</h3>
+                <p>基于大规模高质量数据集训练，在物体检测、图像分割、场景理解等任务上达到业界领先水平。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">99.5% 准确率</span>
+                    <span class="feature-tag">1000+ 类别</span>
+                    <span class="feature-tag">实时检测</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>极速推理部署</h3>
+                <p>采用模型压缩、量化、蒸馏等优化技术，在保证精度的前提下实现毫秒级推理，支持边缘设备部署。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">毫秒级响应</span>
+                    <span class="feature-tag">GPU 优化</span>
+                    <span class="feature-tag">边缘计算</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>持续学习能力</h3>
+                <p>支持在线学习和增量学习，能够根据新数据持续优化模型性能，适应不断变化的业务场景。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">在线更新</span>
+                    <span class="feature-tag">自适应</span>
+                    <span class="feature-tag">零样本学习</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>多模态融合</h3>
+                <p>深度融合视觉、语言、音频等多模态信息，实现跨模态理解与生成，提升复杂场景的感知能力。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">图文理解</span>
+                    <span class="feature-tag">视频分析</span>
+                    <span class="feature-tag">语音交互</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>安全可靠</h3>
+                <p>采用多重安全机制，保障数据隐私和模型安全，符合国际安全标准和行业合规要求。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">数据加密</span>
+                    <span class="feature-tag">权限控制</span>
+                    <span class="feature-tag">审计日志</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>成本优化</h3>
+                <p>提供灵活的部署方案和计费模式，帮助企业降低 AI 应用成本，实现投资回报最大化。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">按需付费</span>
+                    <span class="feature-tag">弹性扩展</span>
+                    <span class="feature-tag">成本监控</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="products" id="products">
+        <div class="section-header">
+            <span class="section-tag">产品能力</span>
+            <h2 class="section-title">全方位视觉智能能力</h2>
+            <p class="section-desc">从基础感知到高级认知，VisLM 提供完整的视觉智能解决方案</p>
+        </div>
+        <div class="product-showcase">
+            <div class="product-main">
+                <div class="product-image"><img border="0" src="https://p2.ssl.qhimgs1.com/sdr/400__/t04ff99e3fb25bd0be2.jpg" width="670" height="490"></p></div>
+                <div class="product-content">
+                    <h3>基础视觉感知能力</h3>
+                    <p>构建强大的视觉基础能力，覆盖图像分类、目标检测、语义分割、关键点检测等核心任务，为上层应用提供坚实支撑。</p>
+                    <ul class="product-features">
+                        <li>高精度图像分类，支持1000+物体类别识别</li>
+                        <li>实时目标检测，支持多尺度、多类别同时检测</li>
+                        <li>像素级语义分割，精准识别图像中每个像素的类别</li>
+                        <li>关键点检测，支持人体、人脸、物体关键点定位</li>
+                    </ul>
+                    <div class="product-stats">
+                        <div class="product-stat">
+                            <div class="product-stat-value">99.8%</div>
+                            <div class="product-stat-label">分类准确率</div>
+                        </div>
+                        <div class="product-stat">
+                            <div class="product-stat-value">50+</div>
+                            <div class="product-stat-label">检测目标类型</div>
+                        </div>
+                        <div class="product-stat">
+                            <div class="product-stat-value">4K</div>
+                            <div class="product-stat-label">支持分辨率</div>
+                        </div>
+                        <div class="product-stat">
+                            <div class="product-stat-value">30fps</div>
+                            <div class="product-stat-label">实时处理帧率</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="product-main reverse">
+                <div class="product-image"><img border="0" src="https://k.sinaimg.cn/n/sinakd20260215s/133/w1080h653/20260215/20b2-dc07a1bf527a105e2ef690b8caac521d.jpg/w700d1q75cms.jpg?by=cms_fixed_width" width="670" height="490"></p></div>
+                <div class="product-content">
+                    <h3>高级视觉认知能力</h3>
+                    <p>基于大模型的视觉认知能力，实现图像理解、内容生成、跨模态交互等高级功能，赋能复杂业务场景。</p>
+                    <ul class="product-features">
+                        <li>图像内容理解，支持自然语言描述和问答</li>
+                        <li>文本生成图像，根据文字描述生成高质量图像</li>
+                        <li>图像编辑与修复，智能修复和编辑图像内容</li>
+                        <li>跨模态检索，支持图文互搜、以图搜图</li>
+                    </ul>
+                    <div class="product-stats">
+                        <div class="product-stat">
+                            <div class="product-stat-value">95%</div>
+                            <div class="product-stat-label">理解准确率</div>
+                        </div>
+                        <div class="product-stat">
+                            <div class="product-stat-value">10+</div>
+                            <div class="product-stat-label">生成风格</div>
+                        </div>
+                        <div class="product-stat">
+                            <div class="product-stat-value">100+</div>
+                            <div class="product-stat-label">语言指令</div>
+                        </div>
+                        <div class="product-stat">
+                            <div class="product-stat-value">秒级</div>
+                            <div class="product-stat-label">生成速度</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="solutions" id="solutions">
+        <div class="section-header">
+            <span class="section-tag">行业解决方案</span>
+            <h2 class="section-title">赋能千行百业数字化转型</h2>
+            <p class="section-desc">结合行业特点和业务需求，提供定制化的视觉智能解决方案</p>
+        </div>
+        <div class="solutions-grid">
+            <div class="solution-card">
+                <div class="solution-icon">🏭</div>
+                <h3>智能制造</h3>
+                <p>基于视觉检测技术，实现产品质量检测、生产过程监控、设备故障识别，提升生产效率和产品质量。</p>
+                <div class="solution-benefits">
+                    <div class="solution-benefit">缺陷检测准确率达99.9%</div>
+                    <div class="solution-benefit">减少80%人工质检成本</div>
+                    <div class="solution-benefit">24小时不间断检测</div>
+                    <div class="solution-benefit">实时生产数据分析</div>
+                </div>
+            </div>
+            <div class="solution-card">
+                <div class="solution-icon">🏪</div>
+                <h3>智慧零售</h3>
+                <p>通过视觉识别技术，实现客流分析、商品识别、顾客行为分析，优化门店运营和用户体验。</p>
+                <div class="solution-benefits">
+                    <div class="solution-benefit">精准客流统计分析</div>
+                    <div class="solution-benefit">商品陈列智能分析</div>
+                    <div class="solution-benefit">顾客行为轨迹追踪</div>
+                    <div class="solution-benefit">无人零售智能结算</div>
+                </div>
+            </div>
+            <div class="solution-card">
+                <div class="solution-icon">🏥</div>
+                <h3>智慧医疗</h3>
+                <p>基于医学影像分析技术，辅助疾病诊断、病灶识别、医疗影像标注，提升诊断效率和准确性。</p>
+                <div class="solution-benefits">
+                    <div class="solution-benefit">医学影像智能分析</div>
+                    <div class="solution-benefit">病灶精准定位识别</div>
+                    <div class="solution-benefit">辅助诊断建议生成</div>
+                    <div class="solution-benefit">医疗数据安全管理</div>
+                </div>
+            </div>
+            <div class="solution-card">
+                <div class="solution-icon">🚗</div>
+                <h3>智能交通</h3>
+                <p>通过视频分析技术，实现车辆识别、违章检测、交通流量分析、行人检测，提升交通管理效率。</p>
+                <div class="solution-benefits">
+                    <div class="solution-benefit">车牌识别准确率99.8%</div>
+                    <div class="solution-benefit">多类型违章自动检测</div>
+                    <div class="solution-benefit">实时交通流量分析</div>
+                    <div class="solution-benefit">道路安全事件预警</div>
+                </div>
+            </div>
+            <div class="solution-card">
+                <div class="solution-icon">🏠</div>
+                <h3>智慧安防</h3>
+                <p>基于视频监控分析技术，实现人员识别、行为分析、异常检测、安全预警，提升安全防范能力。</p>
+                <div class="solution-benefits">
+                    <div class="solution-benefit">人脸识别精准验证</div>
+                    <div class="solution-benefit">异常行为智能检测</div>
+                    <div class="solution-benefit">安全事件实时预警</div>
+                    <div class="solution-benefit">监控数据智能分析</div>
+                </div>
+            </div>
+            <div class="solution-card">
+                <div class="solution-icon">📱</div>
+                <h3>数字内容创作</h3>
+                <p>基于AIGC技术，实现图像生成、视频编辑、内容创作，提升内容生产效率和创意表现。</p>
+                <div class="solution-benefits">
+                    <div class="solution-benefit">文本生成高质量图像</div>
+                    <div class="solution-benefit">视频智能剪辑编辑</div>
+                    <div class="solution-benefit">多风格内容创作</div>
+                    <div class="solution-benefit">批量内容生成处理</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-arch" id="tech">
+        <div class="section-header">
+            <span class="section-tag">技术架构</span>
+            <h2 class="section-title">先进的技术架构体系</h2>
+            <p class="section-desc">分层设计的技术架构，兼顾性能、灵活性和可扩展性</p>
+        </div>
+        <div class="arch-container">
+            <div class="arch-diagram">
+                <div class="arch-layer">
+                    <div class="arch-layer-title">应用层</div>
+                    <div class="arch-blocks">
+                        <div class="arch-block">行业解决方案</div>
+                        <div class="arch-block">API接口</div>
+                        <div class="arch-block">可视化平台</div>
+                        <div class="arch-block">定制化开发</div>
+                    </div>
+                </div>
+                <div class="arch-layer">
+                    <div class="arch-layer-title">服务层</div>
+                    <div class="arch-blocks">
+                        <div class="arch-block">推理服务</div>
+                        <div class="arch-block">训练服务</div>
+                        <div class="arch-block">数据服务</div>
+                        <div class="arch-block">监控服务</div>
+                    </div>
+                </div>
+                <div class="arch-layer">
+                    <div class="arch-layer-title">模型层</div>
+                    <div class="arch-blocks">
+                        <div class="arch-block">基础视觉模型</div>
+                        <div class="arch-block">多模态大模型</div>
+                        <div class="arch-block">行业定制模型</div>
+                        <div class="arch-block">轻量化模型</div>
+                    </div>
+                </div>
+                <div class="arch-layer">
+                    <div class="arch-layer-title">框架层</div>
+                    <div class="arch-blocks">
+                        <div class="arch-block">深度学习框架</div>
+                        <div class="arch-block">模型压缩框架</div>
+                        <div class="arch-block">分布式训练</div>
+                        <div class="arch-block">推理优化引擎</div>
+                    </div>
+                </div>
+                <div class="arch-layer">
+                    <div class="arch-layer-title">基础设施层</div>
+                    <div class="arch-blocks">
+                        <div class="arch-block">GPU集群</div>
+                        <div class="arch-block">云服务器</div>
+                        <div class="arch-block">边缘设备</div>
+                        <div class="arch-block">存储系统</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cases" id="cases">
+        <div class="section-header">
+            <span class="section-tag">客户案例</span>
+            <h2 class="section-title">成功服务上千家企业客户</h2>
+            <p class="section-desc">来自不同行业的客户成功案例，见证VisLM的价值创造</p>
+        </div>
+        <div class="cases-grid">
+            <div class="case-card">
+                <div class="case-image">🏭</div>
+                <div class="case-content">
+                    <span class="case-industry">智能制造</span>
+                    <h3>某汽车零部件厂商质检升级</h3>
+                    <p>通过VisLM视觉检测系统，实现汽车零部件表面缺陷自动检测，替代人工质检，检测准确率达99.9%，质检效率提升300%。</p>
+                    <div class="case-result">
+                        <span>📈</span>
+                        <span>质检成本降低80%，不良品率下降90%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-image">🏪</div>
+                <div class="case-content">
+                    <span class="case-industry">智慧零售</span>
+                    <h3>某连锁超市智能运营系统</h3>
+                    <p>部署VisLM客流分析和商品识别系统，实现门店客流统计、顾客行为分析、商品陈列优化，提升门店销售额15%。</p>
+                    <div class="case-result">
+                        <span>📈</span>
+                        <span>运营效率提升25%，顾客满意度提升20%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-image">🏥</div>
+                <div class="case-content">
+                    <span class="case-industry">智慧医疗</span>
+                    <h3>某三甲医院医学影像分析</h3>
+                    <p>应用VisLM医学影像分析系统，辅助医生进行肺部CT影像分析，病灶识别准确率达98.5%，诊断效率提升40%。</p>
+                    <div class="case-result">
+                        <span>📈</span>
+                        <span>早期病变检出率提升35%，误诊率下降50%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-image">🚗</div>
+                <div class="case-content">
+                    <span class="case-industry">智能交通</span>
+                    <h3>某城市交通智能监控系统</h3>
+                    <p>基于VisLM构建城市交通智能监控平台，实现违章自动检测、流量分析、事件预警，交通违章处理效率提升60%。</p>
+                    <div class="case-result">
+                        <span>📈</span>
+                        <span>道路通行效率提升25%，事故率下降30%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-image">🏠</div>
+                <div class="case-content">
+                    <span class="case-industry">智慧安防</span>
+                    <h3>某园区智能安防系统</h3>
+                    <p>部署VisLM智能安防系统，实现人员识别、行为分析、异常检测，园区安全事件响应时间从小时级缩短至分钟级。</p>
+                    <div class="case-result">
+                        <span>📈</span>
+                        <span>安全事件处置效率提升90%，人力成本降低70%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-image">📱</div>
+                <div class="case-content">
+                    <span class="case-industry">数字内容创作</span>
+                    <h3>某广告公司内容创作平台</h3>
+                    <p>应用VisLM AIGC能力，构建广告内容智能创作平台，实现文案生成图片、视频智能剪辑，内容生产效率提升400%。</p>
+                    <div class="case-result">
+                        <span>📈</span>
+                        <span>内容制作成本降低60%，创意产出提升300%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="section-header">
+            <span class="section-tag">联系我们</span>
+            <h2 class="section-title">开启视觉智能新体验</h2>
+            <p class="section-desc">填写表单获取免费试用资格，我们的专家团队将为您提供专业的解决方案</p>
+        </div>
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>联系方式</h3>
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <div class="contact-content">
+                        <h4>电话咨询</h4>
+                        <p>400-123-4567</p>
+                        <p>工作日 9:00-18:00</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">✉️</div>
+                    <div class="contact-content">
+                        <h4>邮箱联系</h4>
+                        <p>contact@vislm.ai</p>
+                        <p>我们将在24小时内回复您</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <div class="contact-content">
+                        <h4>公司地址</h4>
+                             <p>北京市海淀区中关村科技园区</p>
+                        <p>上海市浦东新区张江高科技园区</p>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-form">
+                <form>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" id="name" placeholder="请输入您的姓名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">电话</label>
+                            <input type="tel" id="phone" placeholder="请输入您的联系电话" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱</label>
+                        <input type="email" id="email" placeholder="请输入您的邮箱地址" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="industry">所属行业</label>
+                        <select id="industry" name="industry">
+                            <option value="manufacture">制造业</option>
+                            <option value="retail">零售行业</option>
+                            <option value="medical">医疗健康</option>
+                            <option value="traffic">智慧交通</option>
+                            <option value="city">智慧城市</option>
+                            <option value="logistics">物流行业</option>
+                            <option value="finance">金融科技</option>
+                            <option value="education">教育培训</option>
+                            <option value="other">其他行业</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">您的需求描述</label>
+                        <textarea id="message" name="message" placeholder="请详细描述您的业务需求、应用场景或想要解决的问题..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">提交申请 · 免费试用</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <div class="logo-icon">👁️</div>
+                    <span class="logo-text">维视<span>灵眸</span></span>
+                </a>
+                <p>维视灵眸 VisLM 是新一代视觉大模型，致力于为企业提供最先进的视觉智能解决方案，赋能各行各业数字化转型。</p>
+                <div class="footer-social">
+                    <a href="#">📱</a>
+                    <a href="#">📧</a>
+                    <a href="#">🔗</a>
+                    <a href="#">💬</a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>产品服务</h4>
+                <ul>
+                    <li><a href="#">基础视觉识别</a></li>
+                    <li><a href="#">高级视觉分析</a></li>
+                    <li><a href="#">定制化解决方案</a></li>
+                    <li><a href="#">API 接口服务</a></li>
+                    <li><a href="#">私有化部署</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>行业方案</h4>
+                <ul>
+                    <li><a href="#">制造业</a></li>
+                    <li><a href="#">零售行业</a></li>
+                    <li><a href="#">医疗健康</a></li>
+                    <li><a href="#">智慧交通</a></li>
+                    <li><a href="#">智慧城市</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>关于我们</h4>
+                <ul>
+                    <li><a href="#">公司介绍</a></li>
+                    <li><a href="#">技术团队</a></li>
+                    <li><a href="#">合作伙伴</a></li>
+                    <li><a href="#">招贤纳士</a></li>
+                    <li><a href="#">联系我们</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 维视灵眸 VisLM 版权所有 | 京ICP备XXXXXXXX号-1</p>
+        <p style="margin-top: 1.15rem; font-size: 0.91rem;">本页面仅用于域名概念展示站，不构成任何商业承诺。欢迎各界朋友洽谈合作ai@altoai.cn</p>
+        </div>
+    </footer>
+
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    document.querySelectorAll('.nav-links a').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body><body oncontextmenu="return false" onselectstart="return false" ondragstart="return false" onbeforecopy="return false" oncopy=document.selection.empty() onselect=document.selection.empty()>
+</html>
